@@ -6,10 +6,11 @@ import commonMiddleware from "../lib/commonMiddleware";
 import { getAuctionById } from "./getAuction";
 import placeBidSchema from "../lib/schemas/placeBidSchema";
 import { getValidatorOptions } from "../lib/getValidatorOptions";
+import { enableCors } from "../lib/middlewares/enableCors";
 
 const dynamoDbDocument = new DynamoDB.DocumentClient();
 
-const placeBid = async (event, context) => {
+const placeBid = enableCors(async (event, context) => {
   const { id } = event.pathParameters;
   const { amount } = event.body;
   const { email } = event.requestContext.authorizer;
@@ -78,7 +79,7 @@ const placeBid = async (event, context) => {
     statusCode: 200,
     body: JSON.stringify({ auction: updatedAuction }),
   };
-};
+});
 
 export const handler = commonMiddleware(placeBid).use(
   validator(getValidatorOptions(placeBidSchema))

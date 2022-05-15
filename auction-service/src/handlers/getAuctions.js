@@ -3,12 +3,13 @@ import validator from "@middy/validator";
 import { InternalServerError } from "http-errors";
 
 import commonMiddleware from "../lib/commonMiddleware";
+import { enableCors } from "../lib/middlewares/enableCors";
 import getAuctionsSchema from "../lib/schemas/getAuctionsSchema";
 import { getValidatorOptions } from "../lib/getValidatorOptions";
 
 const dynamoDbDocument = new DynamoDB.DocumentClient();
 
-async function getAuctions(event, context) {
+const getAuctions = enableCors(async (event, context) => {
   const { status } = event.queryStringParameters;
   let auctions = [];
 
@@ -40,7 +41,7 @@ async function getAuctions(event, context) {
     statusCode: 200,
     body: JSON.stringify({ auctions }),
   };
-}
+});
 
 export const handler = commonMiddleware(getAuctions).use(
   validator(getValidatorOptions(getAuctionsSchema))

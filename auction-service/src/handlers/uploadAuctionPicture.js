@@ -6,9 +6,10 @@ import { InternalServerError, BadRequest } from "http-errors";
 import { getAuctionById } from "./getAuction";
 import { uploadPictureToS3 } from "../lib/uploadPictureToS3";
 import { setAuctionPictureUrl } from "../lib/setAuctionPictureUrl";
+import { enableCors } from "../lib/middlewares/enableCors";
 import uploadAuctionPictureSchema from "../lib/schemas/uploadAuctionPictureSchema";
 
-async function uploadAuctionPicture(event) {
+const uploadAuctionPicture = enableCors(async (event) => {
   const { id } = event.pathParameters;
   const { email } = event.requestContext.authorizer;
 
@@ -62,7 +63,7 @@ async function uploadAuctionPicture(event) {
     statusCode: 200,
     body: JSON.stringify({ auction: updatedAuction }),
   };
-}
+});
 
 export const handler = middy(uploadAuctionPicture)
   .use(jsonErrorHandler())

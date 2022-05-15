@@ -3,13 +3,14 @@ import { DynamoDB } from "aws-sdk";
 import validator from "@middy/validator";
 import { InternalServerError } from "http-errors";
 
+import { enableCors } from "../lib/middlewares/enableCors";
 import commonMiddleware from "../lib/commonMiddleware";
 import { getValidatorOptions } from "../lib/getValidatorOptions";
 import createAuctionSchema from "../lib/schemas/createAuctionSchema";
 
 const dynamoDbDocument = new DynamoDB.DocumentClient();
 
-async function createAuction(event, context) {
+const createAuction = enableCors(async (event, context) => {
   const { title } = event.body;
   const { email } = event.requestContext.authorizer;
 
@@ -48,7 +49,7 @@ async function createAuction(event, context) {
     statusCode: 201,
     body: JSON.stringify({ auction }),
   };
-}
+});
 
 export const handler = commonMiddleware(createAuction).use(
   validator(getValidatorOptions(createAuctionSchema))

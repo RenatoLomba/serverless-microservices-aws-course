@@ -2,6 +2,7 @@ import { DynamoDB } from "aws-sdk";
 import { InternalServerError, BadRequest } from "http-errors";
 
 import commonMiddleware from "../lib/commonMiddleware";
+import { enableCors } from "../lib/middlewares/enableCors";
 
 const dynamoDbDocument = new DynamoDB.DocumentClient();
 
@@ -32,7 +33,7 @@ export async function getAuctionById(id) {
   return auction;
 }
 
-async function getAuction(event, context) {
+const getAuction = enableCors(async (event, context) => {
   const { id } = event.pathParameters;
 
   const auction = await getAuctionById(id);
@@ -41,6 +42,6 @@ async function getAuction(event, context) {
     statusCode: 200,
     body: JSON.stringify({ auction }),
   };
-}
+});
 
 export const handler = commonMiddleware(getAuction);
